@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Secure Authenticator</title>
+  <script src="https://cdn.jsdelivr.net/npm/otplib@12.0.1/otplib-browser.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #111;
+      color: #0f0;
+      padding-top: 100px;
+    }
+    input, button {
+      padding: 10px;
+      font-size: 16px;
+      margin: 10px;
+      border-radius: 5px;
+      border: none;
+    }
+    #authArea {
+      display: none;
+    }
+    .code {
+      font-size: 48px;
+      margin: 30px 0;
+      letter-spacing: 5px;
+    }
+    .timer {
+      font-size: 18px;
+      color: #aaa;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="loginArea">
+    <h2>Enter Password</h2>
+    <input type="password" id="passwordInput" placeholder="Password" />
+    <br>
+    <button onclick="checkPassword()">Unlock</button>
+    <div id="loginError" style="color: red;"></div>
+  </div>
+
+  <div id="authArea">
+    <h1>Authenticator Code</h1>
+    <input id="secret" placeholder="CQFLV7GHFQN5FOG35ELYLPVBBOQF5LQM" />
+    <div class="code" id="code">------</div>
+    <div class="timer" id="timer">Next code in: 30s</div>
+  </div>
+
+  <script>
+    const realPassword = "05092004"; // Change this to your password
+    const codeDisplay = document.getElementById("code");
+    const timerDisplay = document.getElementById("timer");
+    const secretInput = document.getElementById("secret");
+    let secret = "";
+    let countdown = 30;
+
+    function checkPassword() {
+      const input = document.getElementById("passwordInput").value;
+      if (input === realPassword) {
+        document.getElementById("loginArea").style.display = "none";
+        document.getElementById("authArea").style.display = "block";
+      } else {
+        document.getElementById("loginError").textContent = "Wrong password!";
+      }
+    }
+
+    function updateCode() {
+      if (!secret) return;
+      const code = otplib.authenticator.generate(secret.trim().replace(/ /g, ''));
+      codeDisplay.textContent = code;
+    }
+
+    function tick() {
+      countdown--;
+      if (countdown <= 0) {
+        countdown = 30;
+        updateCode();
+      }
+      timerDisplay.textContent = "Next code in: " + countdown + "s";
+    }
+
+    secretInput.addEventListener("input", () => {
+      secret = secretInput.value;
+      updateCode();
+      countdown = 30;
+    });
+
+    setInterval(tick, 1000);
+  </script>
+
+</body>
+</html>
